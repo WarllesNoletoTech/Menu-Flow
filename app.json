@@ -1,0 +1,9 @@
+{
+  "name": "menu-flow-api",
+  "description": "Menu Flow NestJS API",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
