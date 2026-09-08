@@ -2,10 +2,15 @@
   "name": "menu-flow",
   "private": true,
   "workspaces": ["Menu-Flow-frontend", "Menu-Flow-backend"],
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "npm run dev --workspace @menu-flow/frontend",
     "dev:api": "npm run start:dev --workspace @menu-flow/backend",
     "build": "npm run build --workspace @menu-flow/frontend && npm run build --workspace @menu-flow/backend",
-    "lint": "npm run lint --workspace @menu-flow/frontend && npm run lint --workspace @menu-flow/backend"
+    "lint": "npm run lint --workspace @menu-flow/frontend && npm run lint --workspace @menu-flow/backend",
+    "start": "npm run start --workspace @menu-flow/backend",
+    "heroku-postbuild": "npm run build --workspace @menu-flow/backend"
   }
 }
