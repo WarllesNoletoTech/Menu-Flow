@@ -1,11 +1,11 @@
 {
   "name": "menu-flow",
   "private": true,
-  "workspaces": ["frontend", "backend"],
+  "workspaces": ["Menu-Flow-frontend", "Menu-Flow-backend"],
   "scripts": {
-    "dev": "npm run dev --workspace frontend",
-    "dev:api": "npm run start:dev --workspace backend",
-    "build": "npm run build --workspace frontend && npm run build --workspace backend",
-    "lint": "npm run lint --workspace frontend && npm run lint --workspace backend"
+    "dev": "npm run dev --workspace @menu-flow/frontend",
+    "dev:api": "npm run start:dev --workspace @menu-flow/backend",
+    "build": "npm run build --workspace @menu-flow/frontend && npm run build --workspace @menu-flow/backend",
+    "lint": "npm run lint --workspace @menu-flow/frontend && npm run lint --workspace @menu-flow/backend"
   }
 }

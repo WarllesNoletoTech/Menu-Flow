@@ -1,6 +1,6 @@
 # Menu Flow
 
-Plataforma SaaS de cardápio digital multi-tenant para restaurantes. O monorepo separa uma vitrine **Next.js/PWA** (`frontend`) de uma API **NestJS + MongoDB/Mongoose** (`backend`).
+Plataforma SaaS de cardápio digital multi-tenant para restaurantes. O monorepo separa uma vitrine **Next.js/PWA** (`Menu-Flow-frontend`) de uma API **NestJS + MongoDB/Mongoose** (`Menu-Flow-backend`). Os nomes dessas pastas são mantidos intencionalmente.
 
 ## Decisões de arquitetura e riscos tratados
 
@@ -16,8 +16,8 @@ Plataforma SaaS de cardápio digital multi-tenant para restaurantes. O monorepo 
 ## Estrutura
 
 ```text
-frontend/     Next.js, TypeScript, Tailwind e manifest PWA
-backend/      NestJS, REST, JWT, guards, Mongoose e WebSocket
+Menu-Flow-frontend/     Next.js, TypeScript, Tailwind e manifest PWA
+Menu-Flow-backend/      NestJS, REST, JWT, guards, Mongoose e WebSocket
 ```
 
 Os modelos Mongoose contemplam `User`, `Restaurant`, `Category`, `Product`, `AddonGroup`, `Addon`, `Order`, `OrderItem`, `Customer`, endereço embutido, `Coupon`, `DeliveryZone`, `Payment` e `RestaurantSettings`.
@@ -25,8 +25,8 @@ Os modelos Mongoose contemplam `User`, `Restaurant`, `Category`, `Product`, `Add
 ## Configuração local
 
 1. Tenha Node.js 20+ e uma instância MongoDB (local ou Atlas).
-2. Copie o exemplo: `cp .env.example backend/.env` e configure `MONGODB_URI` e um `JWT_SECRET` longo e aleatório.
-3. Crie `frontend/.env.local` com `NEXT_PUBLIC_API_URL=http://localhost:3001`.
+2. Copie o exemplo: `cp .env.example Menu-Flow-backend/.env` e configure `MONGODB_URI` e um `JWT_SECRET` longo e aleatório.
+3. Crie `Menu-Flow-frontend/.env.local` com `NEXT_PUBLIC_API_URL=http://localhost:3001`.
 4. Instale dependências na raiz: `npm install`.
 5. Execute a API: `npm run dev:api`.
 6. Em outro terminal, execute a vitrine: `npm run dev`.
@@ -39,7 +39,7 @@ A API atende em `http://localhost:3001`; o Swagger fica em `/api`.
 1. Faça uma única chamada `POST /auth/bootstrap` com `{ "name", "email", "password" }` para criar o `SUPER_ADMIN` inicial.
 2. Autentique por `POST /auth/login` e envie `Authorization: Bearer <token>`.
 3. Crie uma loja por `POST /restaurants` com `{ "name", "slug", "description" }`.
-4. Crie usuários de loja com `restaurantId` e o papel `RESTAURANT_ADMIN` ou `STAFF` através do módulo de usuários (o papel `SUPER_ADMIN` não deve ser usado no dia a dia).
+4. Crie usuários de loja com `restaurantId` e o papel `RESTAURANT_ADMIN` ou `EMPLOYEE` através do módulo de usuários (o papel `SUPER_ADMIN` não deve ser usado no dia a dia).
 5. Cadastre categorias, produtos, zonas de entrega e formas de pagamento usando os endpoints protegidos daquele `restaurantId`.
 
 ## Verificação
@@ -54,3 +54,10 @@ npm run lint
 - Faça deploy de `frontend` na Vercel e informe `NEXT_PUBLIC_API_URL`.
 - Faça deploy de `backend` no Railway/Heroku com `MONGODB_URI`, `JWT_SECRET`, `FRONTEND_URL` e `PORT`.
 - Use MongoDB Atlas com usuário de menor privilégio e whitelist de rede apropriada.
+
+## Fluxos já implementados
+
+- Checkout público recalcula preços no servidor, recusa produtos de outro tenant, loja bloqueada/fechada, pedido abaixo do mínimo e bairros sem zona de entrega.
+- Cupons válidos aplicam desconto no servidor; o pedido persiste somente o valor calculado.
+- Administradores podem criar e atualizar categorias e produtos no restaurante do token. Funcionários podem consultar pedidos e avançar o status conforme o fluxo permitido.
+- Eventos `order.created` e `order.updated` usam salas Socket.IO por restaurante. O painel deve conectar com `auth: { token }` e `query: { restaurantId }`; o gateway valida ambos antes de ingressar na sala.
