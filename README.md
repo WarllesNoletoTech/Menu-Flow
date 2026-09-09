@@ -65,3 +65,25 @@ npm run typecheck
 - Administradores podem criar e atualizar categorias e produtos no restaurante do token. Produtos suportam grupos de adicionais e regras mínimas/máximas, validadas no checkout pelo backend. Funcionários podem consultar pedidos e avançar o status conforme o fluxo permitido.
 - A criação de usuários exige uma associação válida entre o papel e uma loja existente; administradores da loja não podem alterar o bloqueio da plataforma.
 - Eventos `order.created` e `order.updated` usam salas Socket.IO por restaurante. O painel deve conectar com `auth: { token }` e `query: { restaurantId }`; o gateway valida ambos antes de ingressar na sala.
+
+## Usuários e seed de desenvolvimento
+
+A autenticação é centralizada em `POST /auth/login`: a API devolve o papel do usuário e a interface o direciona para `/admin`, `/empresa`, `/funcionario` ou `/cliente`. Clientes (`CUSTOMER`) não possuem `restaurantId`; pedidos podem ter `customerId` opcional, preservando o checkout visitante. A rota `/` é o login unificado, enquanto `/<slug>` permanece o cardápio público.
+
+Para preparar dados de desenvolvimento/teste, com o MongoDB configurado:
+
+```bash
+npm install
+npm run seed:test
+```
+
+O comando é idempotente e bloqueado quando `NODE_ENV=production`. Ele cria o restaurante `restaurante-teste`, itens básicos do cardápio, um pedido de exemplo e as contas abaixo:
+
+| Papel | E-mail | Senha |
+| --- | --- | --- |
+| SUPER_ADMIN | admin.teste@menuflow.local | Admin@123456 |
+| RESTAURANT_ADMIN | empresa.teste@menuflow.local | Empresa@123456 |
+| EMPLOYEE | funcionario.teste@menuflow.local | Funcionario@123456 |
+| CUSTOMER | cliente.teste@menuflow.local | Cliente@123456 |
+
+**Essas credenciais são somente para desenvolvimento/testes. Não utilizar em produção.**
