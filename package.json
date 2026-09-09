@@ -1,7 +1,10 @@
 {
   "name": "menu-flow",
   "private": true,
-  "workspaces": ["Menu-Flow-frontend", "Menu-Flow-backend"],
+  "workspaces": [
+    "Menu-Flow-frontend",
+    "Menu-Flow-backend"
+  ],
   "engines": {
     "node": "20.x"
   },
@@ -11,6 +14,7 @@
     "build": "npm run build --workspace @menu-flow/frontend && npm run build --workspace @menu-flow/backend",
     "lint": "npm run lint --workspace @menu-flow/frontend && npm run lint --workspace @menu-flow/backend",
     "start": "npm run start --workspace @menu-flow/backend",
-    "heroku-postbuild": "npm run build --workspace @menu-flow/backend"
+    "heroku-postbuild": "npm run build --workspace @menu-flow/backend",
+    "typecheck": "npm run typecheck --workspace @menu-flow/frontend && npm run typecheck --workspace @menu-flow/backend"
   }
 }
