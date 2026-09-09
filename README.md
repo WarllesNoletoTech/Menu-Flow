@@ -34,6 +34,47 @@ Os modelos Mongoose contemplam `User`, `Restaurant`, `Category`, `Product`, `Add
 
 A API atende em `http://localhost:3001`; o Swagger fica em `/api`.
 
+## Diagnóstico e migração de vínculos legados
+
+Versões antigas podem ter persistido `User.restaurantId` como BSON `string`, embora o schema atual use BSON `ObjectId`. O MongoDB considera esses tipos diferentes em consultas, mesmo quando o texto hexadecimal é igual. Os comandos abaixo são manuais: não fazem parte do bootstrap nem do `heroku-postbuild`.
+
+1. Gere o relatório de integridade, que lê a collection nativa (sem casting do Mongoose) e não exibe senhas:
+
+   ```bash
+   npm run check:legacy-links
+   ```
+
+2. Faça obrigatoriamente o dry run. Esse é o modo padrão e não grava no banco:
+
+   ```bash
+   npm run migrate:legacy-links -- --dry-run
+   ```
+
+3. Revise os usuários elegíveis, IDs, estabelecimentos inexistentes, valores inválidos e casos com mais de um lojista. Casos ambíguos nunca são alterados automaticamente. Só depois aplique:
+
+   ```bash
+   npm run migrate:legacy-links -- --apply
+   ```
+
+A migração seleciona apenas `RESTAURANT_ADMIN` e `EMPLOYEE` cujo tipo BSON real é `string`. Ela valida o hexadecimal, confirma `Restaurant._id`, e atualiza exclusivamente o tipo do campo para `ObjectId`, preservando o mesmo ID. Ela não cria nem exclui documentos e não altera nome, e-mail, senha, role, status ou pedidos.
+
+Em produção, após publicar e antes de aplicar, abra um dyno one-off (substitua somente o nome da aplicação):
+
+```bash
+heroku run bash -a <APP>
+```
+
+Dentro do dyno, execute o JavaScript já compilado, nesta ordem:
+
+```bash
+node Menu-Flow-backend/dist/scripts/check-legacy-user-links.js
+node Menu-Flow-backend/dist/scripts/migrate-legacy-restaurant-links.js --dry-run
+# após revisar e aprovar o dry run:
+node Menu-Flow-backend/dist/scripts/migrate-legacy-restaurant-links.js --apply
+```
+
+Se o diretório raiz do app Heroku for `Menu-Flow-backend`, remova o prefixo `Menu-Flow-backend/` desses três caminhos. A aplicação não precisa receber nenhum segredo na linha de comando: o dyno usa `MONGODB_URI` já configurada no ambiente.
+
 ## Primeiro acesso e desenvolvimento
 
 1. Faça uma única chamada `POST /auth/bootstrap` com `{ "name", "email", "password" }` para criar o `SUPER_ADMIN` inicial. Como alternativa somente em desenvolvimento, defina `ADMIN_SEED_ENABLED=true` e `ADMIN_NAME`, `ADMIN_EMAIL` e `ADMIN_PASSWORD`: o bootstrap automático é idempotente, não cria duplicatas e nunca roda com `NODE_ENV=production`.
