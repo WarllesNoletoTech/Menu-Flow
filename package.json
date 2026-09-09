@@ -13,7 +13,8 @@
     "dev:api": "npm run start:dev --workspace @menu-flow/backend",
     "build": "npm run build --workspace @menu-flow/frontend && npm run build --workspace @menu-flow/backend",
     "lint": "npm run lint --workspace @menu-flow/frontend && npm run lint --workspace @menu-flow/backend",
-    "start": "npm run start --workspace @menu-flow/backend",
+    "start": "npm run start:prod --workspace @menu-flow/backend",
+    "start:prod": "npm run start:prod --workspace @menu-flow/backend",
     "heroku-postbuild": "npm run build --workspace @menu-flow/backend",
     "typecheck": "npm run typecheck --workspace @menu-flow/frontend && npm run typecheck --workspace @menu-flow/backend",
     "seed:test": "node scripts/create-test-users.js"

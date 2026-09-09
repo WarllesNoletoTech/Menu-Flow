@@ -55,7 +55,7 @@ npm run typecheck
 ## Deploy
 
 - Faça deploy de `frontend` na Vercel e informe `NEXT_PUBLIC_API_URL`.
-- Faça deploy de `backend` no Railway/Heroku com `MONGODB_URI`, `JWT_SECRET`, `FRONTEND_URL` e `PORT`. No Heroku, conecte o repositório pela raiz deste monorepo: o `package.json` raiz, o `Procfile` e o `app.json` selecionam o buildpack Node.js, compilam somente a API e iniciam `@menu-flow/backend`. Se configurar `Menu-Flow-backend` como diretório raiz do deploy, use o `package.json` e o `Procfile` existentes nessa pasta.
+- Faça deploy de `backend` no Railway/Heroku com `MONGODB_URI` e `JWT_SECRET`; configure também `FRONTEND_URL` quando quiser restringir o CORS ao frontend publicado. No Heroku, **não** defina uma porta fixa: a plataforma fornece `PORT` automaticamente. No Heroku, conecte o repositório pela raiz deste monorepo: o `package.json` raiz, o `Procfile` e o `app.json` selecionam o buildpack Node.js, compilam somente a API e iniciam `@menu-flow/backend`. Se configurar `Menu-Flow-backend` como diretório raiz do deploy, use o `package.json` e o `Procfile` existentes nessa pasta.
 - Use MongoDB Atlas com usuário de menor privilégio e whitelist de rede apropriada.
 
 ## Fluxos já implementados
