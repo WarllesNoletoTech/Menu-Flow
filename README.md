@@ -30,7 +30,7 @@ Os modelos Mongoose contemplam `User`, `Restaurant`, `Category`, `Product`, `Add
 4. Instale dependências na raiz: `npm install`.
 5. Execute a API: `npm run dev:api`.
 6. Em outro terminal, execute a vitrine: `npm run dev`.
-7. Abra `http://localhost:3000/<slug-do-restaurante>`.
+7. Abra `http://localhost:3000`. Na página inicial, informe o código da loja; o cardápio também pode ser acessado diretamente em `http://localhost:3000/<slug-do-restaurante>`.
 
 A API atende em `http://localhost:3001`; o Swagger fica em `/api`.
 
