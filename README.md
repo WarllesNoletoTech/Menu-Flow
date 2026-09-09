@@ -47,6 +47,7 @@ A API atende em `http://localhost:3001`; o Swagger fica em `/api`.
 ```bash
 npm run build
 npm run lint
+npm run typecheck
 ```
 
 ## Deploy
@@ -59,5 +60,6 @@ npm run lint
 
 - Checkout público recalcula preços no servidor, recusa produtos de outro tenant, loja bloqueada/fechada, pedido abaixo do mínimo e bairros sem zona de entrega.
 - Cupons válidos aplicam desconto no servidor; o pedido persiste somente o valor calculado.
-- Administradores podem criar e atualizar categorias e produtos no restaurante do token. Funcionários podem consultar pedidos e avançar o status conforme o fluxo permitido.
+- Administradores podem criar e atualizar categorias e produtos no restaurante do token. Produtos suportam grupos de adicionais e regras mínimas/máximas, validadas no checkout pelo backend. Funcionários podem consultar pedidos e avançar o status conforme o fluxo permitido.
+- A criação de usuários exige uma associação válida entre o papel e uma loja existente; administradores da loja não podem alterar o bloqueio da plataforma.
 - Eventos `order.created` e `order.updated` usam salas Socket.IO por restaurante. O painel deve conectar com `auth: { token }` e `query: { restaurantId }`; o gateway valida ambos antes de ingressar na sala.
