@@ -30,17 +30,19 @@ Os modelos Mongoose contemplam `User`, `Restaurant`, `Category`, `Product`, `Add
 4. Instale dependências na raiz: `npm install`.
 5. Execute a API: `npm run dev:api`.
 6. Em outro terminal, execute a vitrine: `npm run dev`.
-7. Abra `http://localhost:3000`. Na página inicial, informe o código da loja; o cardápio também pode ser acessado diretamente em `http://localhost:3000/<slug-do-restaurante>`.
+7. Abra `http://localhost:3000` para entrar no sistema; o cardápio continua público em `http://localhost:3000/<slug-do-restaurante>`.
 
 A API atende em `http://localhost:3001`; o Swagger fica em `/api`.
 
 ## Primeiro acesso e desenvolvimento
 
-1. Faça uma única chamada `POST /auth/bootstrap` com `{ "name", "email", "password" }` para criar o `SUPER_ADMIN` inicial.
+1. Faça uma única chamada `POST /auth/bootstrap` com `{ "name", "email", "password" }` para criar o `SUPER_ADMIN` inicial. Como alternativa somente em desenvolvimento, defina `ADMIN_SEED_ENABLED=true` e `ADMIN_NAME`, `ADMIN_EMAIL` e `ADMIN_PASSWORD`: o bootstrap automático é idempotente, não cria duplicatas e nunca roda com `NODE_ENV=production`.
 2. Autentique por `POST /auth/login` e envie `Authorization: Bearer <token>`.
 3. Crie uma loja por `POST /restaurants` com `{ "name", "slug", "description" }`.
 4. Crie usuários de loja com `restaurantId` e o papel `RESTAURANT_ADMIN` ou `EMPLOYEE` através do módulo de usuários (o papel `SUPER_ADMIN` não deve ser usado no dia a dia).
 5. Cadastre categorias, produtos, zonas de entrega e formas de pagamento usando os endpoints protegidos daquele `restaurantId`.
+
+O login em `/` solicita e-mail e senha ao endpoint `POST /auth/login`, guarda apenas o JWT e os dados não sensíveis da sessão no `sessionStorage` (nenhuma senha é persistida) e direciona o papel retornado pela API para `/admin`, `/empresa` ou `/funcionario`. Essas páginas verificam o perfil no cliente para uma navegação adequada; a autorização efetiva e o isolamento entre restaurantes permanecem nos guards JWT, roles e tenant da API.
 
 ## Verificação
 
