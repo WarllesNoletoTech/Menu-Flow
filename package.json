@@ -10,6 +10,8 @@
   },
   "scripts": {
     "create-super-admin": "npm run create-super-admin --workspace @menu-flow/backend",
+    "check:legacy-links": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/check-legacy-user-links.js",
+    "migrate:legacy-links": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-legacy-restaurant-links.js",
     "dev": "npm run dev --workspace @menu-flow/frontend",
     "dev:api": "npm run start:dev --workspace @menu-flow/backend",
     "build": "npm run build --workspace @menu-flow/frontend && npm run build --workspace @menu-flow/backend",
