@@ -9,6 +9,7 @@
     "node": "20.x"
   },
   "scripts": {
+    "create-super-admin": "npm run create-super-admin --workspace @menu-flow/backend",
     "dev": "npm run dev --workspace @menu-flow/frontend",
     "dev:api": "npm run start:dev --workspace @menu-flow/backend",
     "build": "npm run build --workspace @menu-flow/frontend && npm run build --workspace @menu-flow/backend",
