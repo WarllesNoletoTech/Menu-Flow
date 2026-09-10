@@ -25,3 +25,25 @@ Nenhuma migration destrutiva ou reset de dados faz parte desta alteração.
 ## Produção
 
 O endpoint de bootstrap é bloqueado em produção; use `npm run create-super-admin`. O rate limiter global e limites específicos de autenticação estão ativos. WebSockets revalidam o usuário persistido a cada conexão. Uma futura migração do JWT deve preferir cookie `HttpOnly`, `Secure` e `SameSite`, acompanhada de proteção CSRF. Hosts de imagens devem ser informados em `IMAGE_HOSTS` e apontar apenas para o serviço oficial de upload/CDN.
+
+## Auditoria de contratos do fluxo de pedidos (2026-09-10)
+
+| Função | Frontend envia | Backend espera | Backend retorna | Frontend consome |
+| --- | --- | --- | --- | --- |
+| Restaurante público | `slug` ou filtros | slug/query pública | endereço, mapa, horário, pausa e disponibilidade final | card, cabeçalho, checkout e retirada |
+| Payment | `method`, `name`, `active` | enum de método, nome e booleano | métodos persistidos; publicamente, somente ativos | opções sincronizadas do checkout |
+| DeliveryZone | nome, taxa e ativo | tenant do JWT, nome e taxa | zona e taxa persistida | `deliveryZoneId`, nome e taxa exibida |
+| Checkout | dados pessoais, modalidade, IDs de zona/produto/adicional, pagamento e troco em centavos | DTO validado; tenant vem da URL e identidade opcional do JWT | pedido real com token público e totais recalculados | redirecionamento seguro ao acompanhamento |
+| Order | sem preços fornecidos pelo cliente | produtos disponíveis do tenant | snapshot, totais e status `PENDING` | painel, meus pedidos e acompanhamento |
+| Order status | status e motivo quando recusado | transição permitida e tenant dos guards | pedido atualizado | painel e atualização do cliente |
+| Catalog | IDs e dados administrativos | tenant do JWT; grupos e limites válidos | categorias/produtos persistidos | gestor e cardápio público |
+| BusinessHours | sete dias e períodos | horários válidos sem sobreposição | configuração persistida e timezone | editor e disponibilidade pública |
+
+### Divergências encontradas e resolvidas
+
+- O estado de pagamento era inicializado apenas na montagem do modal. Quando a resposta pública mudava durante o checkout, as opções renderizavam, mas `payment` continuava vazio. A seleção agora é reconciliada com a lista ativa, e a ausência de métodos tem mensagem explícita.
+- A entrega identificava a zona apenas pelo texto do bairro. O checkout agora envia `deliveryZoneId`; a API confirma simultaneamente ID, tenant, estado ativo e nome da região e continua aceitando o contrato legado por nome.
+- O tipo da listagem pública descartava endereço, mapa e a semântica completa de disponibilidade. O contrato tipado agora representa esses campos e o card usa `canAcceptOrdersNow`.
+- O modal de recusa compartilhava um único estado entre select e textarea. Motivo rápido e observação agora são independentes.
+
+Não foi criada migration: as alterações são aditivas e compatíveis com pedidos antigos. Nenhum guard, índice, coleção ou registro foi removido.
