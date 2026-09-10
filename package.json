@@ -24,6 +24,7 @@
     "check:integration-contracts": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-integration-contracts.js",
     "migrate:integration-contracts": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-integration-contracts.js --apply",
     "check:delivery-coverage": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-delivery-coverage.js",
-    "migrate:delivery-coverage": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-delivery-coverage.js --apply"
+    "migrate:delivery-coverage": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-delivery-coverage.js --apply",
+    "migrate:order-whatsapp": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-order-whatsapp.js"
   }
 }

@@ -140,3 +140,14 @@ O comando é idempotente e bloqueado quando `NODE_ENV=production`. Ele cria o re
 | CUSTOMER | cliente.teste@menuflow.local | Cliente@123456 |
 
 **Essas credenciais são somente para desenvolvimento/testes. Não utilizar em produção.**
+
+## Migração do WhatsApp para pedidos
+
+O campo `Restaurant.orderWhatsapp` armazena exclusivamente o número brasileiro normalizado (`55` + DDD + número). Para instalações que já utilizavam o WhatsApp administrativo, revise primeiro o dry-run e só então aplique o backfill não destrutivo:
+
+```bash
+npm run migrate:order-whatsapp
+npm run migrate:order-whatsapp -- --apply
+```
+
+Números inválidos são apenas reportados e não são alterados. O campo administrativo legado permanece intacto.
