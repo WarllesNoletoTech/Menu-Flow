@@ -58,6 +58,16 @@ Versões antigas podem ter persistido `User.restaurantId` como BSON `string`, em
 
 A migração seleciona apenas `RESTAURANT_ADMIN` e `EMPLOYEE` cujo tipo BSON real é `string`. Ela valida o hexadecimal, confirma `Restaurant._id`, e atualiza exclusivamente o tipo do campo para `ObjectId`, preservando o mesmo ID. Ela não cria nem exclui documentos e não altera nome, e-mail, senha, role, status ou pedidos.
 
+Os horários possuem uma verificação separada para `RestaurantSettings`. O primeiro comando é sempre um dry run: ele lista IDs ausentes/inválidos, vínculos órfãos e duplicidades sem alterar dados. O modo `--apply` somente converte vínculos string seguros, inicializa campos ausentes e cria/confirma o índice único quando não há ambiguidades:
+
+```bash
+npm run migrate:business-hours --workspace @menu-flow/backend
+# somente depois de revisar o relatório:
+npm run migrate:business-hours --workspace @menu-flow/backend -- --apply
+```
+
+Se houver duplicidades ou documentos órfãos, a migração encerra sem excluir ou mesclar documentos; esses IDs devem ser revisados manualmente antes de uma nova execução.
+
 Em produção, após publicar e antes de aplicar, abra um dyno one-off (substitua somente o nome da aplicação):
 
 ```bash
@@ -69,8 +79,10 @@ Dentro do dyno, execute o JavaScript já compilado, nesta ordem:
 ```bash
 node Menu-Flow-backend/dist/scripts/check-legacy-user-links.js
 node Menu-Flow-backend/dist/scripts/migrate-legacy-restaurant-links.js --dry-run
+node Menu-Flow-backend/dist/scripts/migrate-business-hours.js
 # após revisar e aprovar o dry run:
 node Menu-Flow-backend/dist/scripts/migrate-legacy-restaurant-links.js --apply
+node Menu-Flow-backend/dist/scripts/migrate-business-hours.js --apply
 ```
 
 Se o diretório raiz do app Heroku for `Menu-Flow-backend`, remova o prefixo `Menu-Flow-backend/` desses três caminhos. A aplicação não precisa receber nenhum segredo na linha de comando: o dyno usa `MONGODB_URI` já configurada no ambiente.
