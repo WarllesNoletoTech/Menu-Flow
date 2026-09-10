@@ -20,6 +20,8 @@
     "start:prod": "npm run start:prod --workspace @menu-flow/backend",
     "heroku-postbuild": "npm run build --workspace @menu-flow/backend",
     "typecheck": "npm run typecheck --workspace @menu-flow/frontend && npm run typecheck --workspace @menu-flow/backend",
-    "seed:test": "node scripts/create-test-users.js"
+    "seed:test": "node scripts/create-test-users.js",
+    "check:integration-contracts": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-integration-contracts.js",
+    "migrate:integration-contracts": "npm run build --workspace @menu-flow/backend && node Menu-Flow-backend/dist/scripts/migrate-integration-contracts.js --apply"
   }
 }
