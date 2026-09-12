@@ -1,0 +1,83 @@
+CARDÁPIO TRANSCRITO DAS IMAGENS - DIONE PIZZA
+
+REGRA: ao escolher metade/meia a meia, prevalece o valor do sabor mais caro.
+Tamanhos: P = 6 fatias | M = 8 fatias | G = 10 fatias | GG = 12 fatias
+
+PIZZAS TRADICIONAIS: P R$45,00 | M R$60,00 | G R$70,00 | GG R$80,00
+- Calabresa: Molho de tomate, mussarela, calabresa, cebola, azeitona e orégano
+- Baiana: Molho de tomate, mussarela, presunto, calabresa, pimenta de cheiro, azeitona, cebola, pimenta calabresa e orégano
+- Presunto: Molho de tomate, mussarela, presunto, tomate, pimentão, cebola, azeitona e orégano
+- Mussarela: Molho de tomate, mussarela, tomate, azeitona e orégano
+- Napolitana: Molho de tomate, mussarela, tomate, palmito, azeitona e orégano
+- Marguerita: Molho de tomate, mussarela, tomate, manjericão, azeitona e orégano
+- Bacon: Molho de tomate, mussarela, bacon, milho e orégano
+
+PIZZAS ESPECIAIS: P R$55,00 | M R$65,00 | G R$75,00 | GG R$90,00
+- Moda da Casa: Molho de tomate, mussarela, presunto, frango, calabresa, milho verde, azeitona e orégano
+- Frango Catupiry: Molho de tomate, mussarela, frango, catupiry, milho, palmito e orégano
+- Portuguesa: Molho de tomate, mussarela, presunto, tomate, pimentão, cebola, ovos e orégano
+- Deliciosa: Molho de tomate, mussarela, tomate, azeitona, bacon, calabresa, requeijão e orégano
+- Mineira: Molho de tomate, mussarela, presunto, tomate, pimentão, cebola, bacon, alho frito e orégano
+- Afrodisíaca: Molho de tomate, mussarela, presunto, calabresa, ovos, palmito, pimenta calabresa e orégano
+- Carajás: Molho de tomate, mussarela, carne, tomate, creme de leite e orégano
+- Frango ao Creme: Molho de tomate, mussarela, frango, creme de leite, banana, azeitona e orégano
+- 4 Queijos: Molho de tomate, mussarela, cheddar, requeijão, parmesão, catupiry e orégano
+- Peperoni: Molho de tomate, mussarela, pepperoni, cebola e orégano
+
+PIZZAS PREMIUM: P R$65,00 | M R$75,00 | G R$85,00 | GG R$100,00
+- Carne de Sol Cremosa: Molho de tomate, mussarela, carne de sol, creme de leite, banana e orégano
+- Carne de Sol: Molho de tomate, mussarela, carne de sol, cebola e orégano
+- Camarão com Cream Cheese: Molho de tomate, mussarela, camarão, alho frito, cream cheese e orégano
+- Camarão com Palmito: Molho de tomate, mussarela, camarão, palmito, alho frito e orégano
+- Filé com Cream Cheese: Molho de tomate, mussarela, filé, bacon, cream cheese, alho frito e orégano
+- Prime com Cream Cheese: Molho de tomate, mussarela, picanha, alho frito, cebola, cream cheese e orégano
+
+FILÉ AO 4 QUEIJOS: P R$75,00 | M R$85,00 | G R$95,00 | GG R$115,00
+- Filé ao 4 Queijos: Molho de tomate, mussarela, filé, catupiry, cheddar, cream cheese, parmesão, pimenta de cheiro, cebola, alho frito e orégano
+
+PIZZAS DOCES: P R$55,00 | M R$65,00 | G R$75,00 | GG R$90,00
+- Nutella: Creme de leite, Nutella e M&Ms
+- Nutella com Morango: Creme de leite, Nutella e morango
+- Chocolate: Creme de leite, chocolate e M&Ms
+- Banana Cremosa: Mussarela, leite condensado, creme de leite, banana e canela
+
+BORDAS: R$20,00
+- Mussarela
+- Catupiry
+- Catupiry c/ Calabresa
+- Queijo Cheddar
+
+ESFIHAS
+- Carne — R$10.00: Massa artesanal, carne bovina temperada com tomate, cebola e um toque de limão
+- Calabresa — R$10.00: Massa artesanal, queijo mussarela e calabresa fatiada
+- Pizza — R$10.00: Massa artesanal, queijo mussarela, presunto, tomate e orégano
+- Bacon — R$10.00: Massa artesanal, queijo mussarela e bacon em cubos
+- Alho Frito — R$10.00: Massa artesanal, queijo mussarela e alho frito
+- Presunto e Queijo — R$10.00: Massa artesanal, presunto e queijo ralado
+- Frango Cremoso — R$12.00: Massa artesanal, queijo mussarela, frango desfiado e requeijão
+- Frango c/ Cream Cheese — R$12.00: Massa artesanal, queijo mussarela, frango desfiado e cream cheese
+- Carne com Queijo — R$12.00: Massa artesanal, carne bovina moída, tomate, cebola e queijo mussarela
+- Carne com Cheddar — R$12.00: Massa artesanal, carne bovina moída, tomate, cebola e cheddar
+- Carne de Sol c/ Cream Cheese — R$12.00: Massa artesanal, queijo mussarela, carne de sol desfiada e cream cheese
+- Carne de Sol c/ Requeijão — R$12.00: Massa artesanal, queijo mussarela, carne de sol desfiada e requeijão cremoso
+- Nutella — R$10.00: Massa artesanal coberta com Nutella Original
+- Chocolate com M&M — R$10.00: Massa artesanal coberta com chocolate ao leite e M&M
+- Banana Cremosa — R$10.00: Massa artesanal, mussarela, banana, creme de leite e leite condensado com canela
+
+PETISCOS
+- Batata Simples (350g) — R$22.00
+- Batata Especial (350g) — R$26.00: Queijo cheddar e bacon
+- Quibe Frito (300g) — R$25.00
+- Coxinha de Frango (300g) — R$25.00
+- Bolinha de Queijo (300g) — R$25.00
+- Calabresa Acebolada (500g) — R$32.00
+- Frango a Passarinho (500g) — R$35.00
+- Torresmo (400g) — R$35.00
+
+BEBIDAS
+- Coca-Cola 2 Litros — R$15.00
+- Guaraná 2 Litros — R$15.00
+- Fanta 2 Litros — R$15.00
+- Coca-Cola 1 Litro — R$10.00
+- Guaraná 1 Litro — R$10.00
+- Fanta 1 Litro — R$10.00
