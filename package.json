@@ -6,7 +6,7 @@
     "Menu-Flow-backend"
   ],
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "scripts": {
     "create-super-admin": "npm run create-super-admin --workspace @menu-flow/backend",
