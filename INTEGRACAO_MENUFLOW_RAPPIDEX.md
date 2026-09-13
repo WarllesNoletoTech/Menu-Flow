@@ -9,6 +9,7 @@
 - Liberar a entrega sem motoboy mantém o pedido Menu Flow no fluxo interno atual; quando o motoboy assumir a entrega e a Rappidex passar para **ACAMINHO**, o Menu Flow muda automaticamente para **OUT_FOR_DELIVERY / Saiu para entrega**.
 - Todas as mudanças de status da Rappidex são guardadas em `rappidexStatus` e exibidas no card do pedido Menu Flow.
 - Ao chegar em **FINALIZADO**, o Menu Flow conclui automaticamente o pedido.
+- Quando o lojista cancela no Menu Flow uma entrega que já existe na Rappidex, o backend confirma o cancelamento na Rappidex **antes** de marcar o pedido como cancelado localmente. Se a entrega já tiver sido assumida por motoboy, a Rappidex bloqueia e o Menu Flow mantém o pedido ativo.
 
 ## Configuração no Menu Flow
 
