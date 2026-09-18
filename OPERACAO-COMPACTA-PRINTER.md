@@ -1,38 +1,58 @@
-# Operação compacta + Menu Flow Printer 1.1
+# Operação de salão + Menu Flow Printer 1.1
 
-## O que mudou
+## Fluxo de produção
 
-- Pedido de mesa enviado pelo garçom entra direto em `PREPARING` e é enfileirado automaticamente para impressão.
-- Categoria do cardápio possui `productionSector`: `KITCHEN`, `BAR` ou `NONE`.
-- Pedidos mistos geram uma comanda de COZINHA e outra de BAR.
+- Pedido de mesa enviado pelo garçom entra direto em `PREPARING`, sem etapa de aceite.
+- A impressão automática acontece assim que o garçom envia o pedido, quando o Menu Flow Printer estiver habilitado.
+- Cada **categoria que já existe no cardápio da loja** pode receber apenas um destino de impressão: `KITCHEN`, `BAR` ou `NONE`.
+- O sistema **não cria categorias de Cozinha ou Bar** no cardápio.
+- Pedidos mistos podem gerar uma comanda de COZINHA e outra de BAR.
 - O Menu Flow Printer pode usar a mesma impressora física para COZINHA + BAR ou impressoras diferentes.
-- A produção finaliza os setores separadamente. O pedido só fica `READY` quando todos os setores usados estiverem prontos.
-- A tela Operação usa paginação para Mesas, Produção, Caixa e produtos do cardápio, reduzindo a necessidade de rolagem.
-- O caixa possui fechamento integral rápido com Pix, Dinheiro, Débito ou Crédito.
-- Em dinheiro, o caixa pode informar o valor recebido e visualizar o troco.
-- Pagamentos parciais, desconto, transferência, junção de mesas e histórico continuam em opções secundárias.
-- A URL do backend no agente Windows é normalizada; barra `/` no final não interfere na conexão.
+- O pedido só fica `READY` quando todos os setores usados no pedido forem finalizados.
 
-## Compatibilidade com cardápios existentes
+## Cardápio
 
-Categorias antigas sem `productionSector` continuam funcionando. Nomes típicos de bebidas (Bebidas, Refrigerantes, Sucos, Cervejas, Drinks etc.) são inferidos como BAR na criação de pedidos. O lojista pode confirmar ou alterar o setor na tela de categorias.
+Na administração das categorias reais do cardápio existe o campo **Destino da impressão**:
+
+- Cozinha
+- Bar
+- Não imprimir
+
+Categorias novas não são classificadas automaticamente por nome. O padrão é Cozinha até o lojista alterar o destino.
+
+Na tela do garçom aparecem somente categorias reais que possuem produtos disponíveis. O garçom não vê categorias artificiais de Cozinha/Bar.
+
+## Caixa
+
+O caixa mantém as funcionalidades completas:
+
+- resumo da conta;
+- subtotal, taxa de serviço, desconto, total, valor pago e saldo;
+- imprimir pré-conta;
+- pagamento parcial;
+- dividir por quantidade de pessoas;
+- cobrar um pedido específico;
+- Pix, dinheiro, débito e crédito;
+- observação de pagamento;
+- aplicar desconto;
+- histórico de pagamentos;
+- fechar a mesa quando o saldo chegar a zero.
+
+A fila do caixa continua paginada para evitar uma página longa, mas ao abrir uma conta todas as funções ficam reunidas na mesma janela.
+
+## Janelas e navegação
+
+O editor de produto/adicionais não abre mais um modal por cima da comanda. Ele usa a mesma janela da mesa:
+
+- `Voltar para a comanda` retorna para o pedido;
+- o botão `X` fecha a operação inteira de uma vez.
+
+Isso evita fechar uma janela e descobrir outra janela aberta por baixo.
 
 ## Deploy recomendado
 
 1. Publicar o backend.
 2. Publicar o frontend.
-3. Atualizar o Menu Flow Printer nos computadores dos restaurantes que usarão BAR.
-4. No cardápio, revisar o setor de cada categoria.
-5. Em Operação > Printer, confirmar que `Imprimir pedidos automaticamente` está ligado.
-
-## Smoke test
-
-1. Abra uma mesa com um garçom.
-2. Faça um pedido com pelo menos um item de Cozinha e um item de Bar.
-3. Confirme que o pedido entra direto em Produção sem etapa de aceite.
-4. Confirme duas comandas: COZINHA e BAR. Com impressora compartilhada, ambas devem sair na mesma impressora.
-5. Marque somente BAR como pronto: o pedido deve continuar em preparo para Cozinha.
-6. Marque Cozinha como pronta: o pedido passa para Pronto e o garçom pode marcar Entregue na mesa.
-7. Garçom solicita conta; ela deve aparecer automaticamente no Caixa.
-8. Teste `Receber e fechar` com Pix e depois, em outra mesa, Dinheiro com troco.
-9. Confirme que a mesa volta para Livre após o fechamento.
+3. Atualizar o Menu Flow Printer nos computadores que usarão BAR.
+4. Revisar o **Destino da impressão** das categorias reais no cardápio.
+5. Em Operação > Printer, confirmar que a impressão automática de pedidos está habilitada.
