@@ -1,4 +1,4 @@
-# Menu Flow Printer 1.2
+# Menu Flow Printer 1.3
 
 Agente de impressão do Menu Flow para **Windows**, sem precisar instalar Node.js ou outro runtime externo.
 
@@ -37,8 +37,10 @@ Os botões **Testar cozinha**, **Testar bar** e **Testar caixa** também respeit
 
 O Menu Flow usa a largura configurada no estabelecimento:
 
-- **58 mm:** aproximadamente 32 caracteres úteis por linha, margens reduzidas e fonte compacta.
-- **80 mm:** aproximadamente 48 caracteres úteis por linha, mais espaço para nomes e valores.
+- **58 mm:** 30 caracteres úteis por linha, com margem de segurança nas laterais.
+- **80 mm:** 46 caracteres úteis por linha, com margem de segurança nas laterais.
+
+Além da largura útil reduzida, o agente aplica uma pequena **margem física ESC/POS à esquerda**. Isso reduz o risco de nomes, observações e valores encostarem ou serem cortados nas bordas em impressoras com área imprimível menor que a bobina.
 
 Pedidos, adicionais, observações, totais, taxa de serviço, caixa, suprimentos, sangrias e fechamento são quebrados e alinhados conforme a bobina escolhida.
 

@@ -1,2 +1,2 @@
-Menu Flow Printer 1.2.0
-Modo de teste sem impressora + layout térmico 58 mm / 80 mm
+Menu Flow Printer 1.3.0
+Margem segura de impressão + modo de teste + layout térmico 58 mm / 80 mm

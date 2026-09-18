@@ -108,21 +108,26 @@ function Join-ByteArrays([byte[][]]$Arrays) {
   return $result
 }
 
-function ConvertTo-EscPosBytes([string]$Text) {
+function ConvertTo-EscPosBytes([string]$Text, [int]$PaperWidth = 80) {
   try { $encoding = [System.Text.Encoding]::GetEncoding(860) }
   catch { $encoding = [System.Text.Encoding]::ASCII }
   $clean = $Text.Replace([char]0x2013, '-').Replace([char]0x2014, '-').Replace([char]0x2022, '*')
   $body = $encoding.GetBytes($clean)
   $init = [byte[]](0x1B,0x40)
   $codePage = [byte[]](0x1B,0x74,0x03)
+  # Margem física de segurança: ~1 mm em 58 mm e ~1,5 mm em 80 mm (203 dpi).
+  $leftDots = if ($PaperWidth -eq 58) { 8 } else { 12 }
+  $marginLow = [byte]($leftDots -band 0xFF)
+  $marginHigh = [byte](($leftDots -shr 8) -band 0xFF)
+  $leftMargin = [byte[]](0x1D,0x4C,$marginLow,$marginHigh)
   $feeds = [byte[]](0x0A,0x0A,0x0A)
   $cut = [byte[]](0x1D,0x56,0x00)
-  return Join-ByteArrays @($init,$codePage,$body,$feeds,$cut)
+  return Join-ByteArrays @($init,$codePage,$leftMargin,$body,$feeds,$cut)
 }
 
-function Send-MenuFlowPrint([string]$PrinterName, [string]$Content, [int]$Copies = 1) {
+function Send-MenuFlowPrint([string]$PrinterName, [string]$Content, [int]$Copies = 1, [int]$PaperWidth = 80) {
   if ([string]::IsNullOrWhiteSpace($PrinterName)) { throw 'Nenhuma impressora configurada para este setor.' }
-  $bytes = ConvertTo-EscPosBytes $Content
+  $bytes = ConvertTo-EscPosBytes $Content $PaperWidth
   for ($i = 0; $i -lt [Math]::Max(1,$Copies); $i++) { [MenuFlowRawPrinter]::Send($PrinterName, $bytes) }
 }
 
@@ -158,7 +163,7 @@ function Save-TestPrint([string]$Type, [string]$Role, [string]$Content, [int]$Pa
   $pdfPath = Join-Path $folder ($baseName + '.pdf')
 
   $Content | Set-Content -Path $txtPath -Encoding UTF8
-  $bodyWidth = if ($paper -eq 58) { 54 } else { 76 }
+  $bodyWidth = if ($paper -eq 58) { 52 } else { 74 }
   $fontSize = if ($paper -eq 58) { 9.3 } else { 10.4 }
   $encoded = ConvertTo-HtmlEncoded $Content
   $html = @"
@@ -170,7 +175,7 @@ function Save-TestPrint([string]$Type, [string]$Role, [string]$Content, [int]$Pa
 <style>
 @page { size: ${paper}mm auto; margin: 0; }
 html, body { margin: 0; padding: 0; background: white; }
-body { width: ${paper}mm; box-sizing: border-box; padding: 2mm; font-family: Consolas, 'Courier New', monospace; font-size: ${fontSize}pt; line-height: 1.24; color: #111; }
+body { width: ${paper}mm; box-sizing: border-box; padding: 3mm; font-family: Consolas, 'Courier New', monospace; font-size: ${fontSize}pt; line-height: 1.24; color: #111; }
 .receipt { width: ${bodyWidth}mm; margin: 0; white-space: pre-wrap; overflow-wrap: normal; word-break: normal; }
 </style>
 </head>
@@ -196,7 +201,7 @@ function Open-TestFolder {
 }
 
 function Get-SampleReceipt([string]$Role, [int]$PaperWidth) {
-  $w = if ($PaperWidth -eq 58) { 32 } else { 48 }
+  $w = if ($PaperWidth -eq 58) { 30 } else { 46 }
   $line = '-' * $w
   switch ($Role) {
     'BAR' { return "          MENU FLOW`n        PEDIDO - BAR`n$line`nMesa 07     #MF-1024`nGarcom: Joao`n$line`n2x Coca-Cola Lata`n1x Suco de Maracuja`n  OBS: SEM GELO`n$line`n             BAR`n" }
@@ -262,7 +267,7 @@ function Invoke-Poll {
           $script:NotifyIcon.ShowBalloonTip(1600, 'Menu Flow Printer', 'Prévia salva em ' + $preview.Folder, [System.Windows.Forms.ToolTipIcon]::Info)
         } else {
           $printer = Get-PrinterForRole ([string]$job.printerRole)
-          Send-MenuFlowPrint $printer ([string]$job.content) ([int]$job.copies)
+          Send-MenuFlowPrint $printer ([string]$job.content) ([int]$job.copies) $paper
           $script:LastPrinted = (Get-Date).ToString('dd/MM/yyyy HH:mm:ss') + ' · ' + $job.type + ' · ' + $job.printerRole + ' · ' + $paper + 'mm'
           Invoke-MenuFlowApi ('/printer/agent/jobs/' + $job.id) 'PATCH' @{ deviceId = [string]$script:Config.deviceId; success = $true } | Out-Null
           Set-Status ('Conectado · ultima impressao: ' + $script:LastPrinted) $false
@@ -437,9 +442,9 @@ $saveButton.Add_Click({
   Set-Status 'Configuracao salva. Conectando...' $false
   Invoke-Poll
 })
-$testKitchenButton.Add_Click({ try { $paper=if([string]$paperCombo.SelectedItem -eq '58 mm'){58}else{80}; $content=Get-SampleReceipt 'KITCHEN' $paper; if($testModeCheck.Checked){$preview=Save-TestPrint 'LOCAL_TEST' 'KITCHEN' $content $paper; [Windows.Forms.MessageBox]::Show('Prévia salva em: ' + $preview.Folder,'Menu Flow Printer')|Out-Null}else{Send-MenuFlowPrint ([string]$kitchenCombo.SelectedItem) $content 1; [Windows.Forms.MessageBox]::Show('Teste enviado para a cozinha.','Menu Flow Printer')|Out-Null} } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
-$testBarButton.Add_Click({ try { $paper=if([string]$paperCombo.SelectedItem -eq '58 mm'){58}else{80}; $content=Get-SampleReceipt 'BAR' $paper; if($testModeCheck.Checked){$preview=Save-TestPrint 'LOCAL_TEST' 'BAR' $content $paper; [Windows.Forms.MessageBox]::Show('Prévia salva em: ' + $preview.Folder,'Menu Flow Printer')|Out-Null}else{$target=if($sharedCheck.Checked){[string]$kitchenCombo.SelectedItem}else{[string]$barCombo.SelectedItem}; Send-MenuFlowPrint $target $content 1; [Windows.Forms.MessageBox]::Show('Teste enviado para o bar.','Menu Flow Printer')|Out-Null} } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
-$testCashierButton.Add_Click({ try { $paper=if([string]$paperCombo.SelectedItem -eq '58 mm'){58}else{80}; $content=Get-SampleReceipt 'CASHIER' $paper; if($testModeCheck.Checked){$preview=Save-TestPrint 'LOCAL_TEST' 'CASHIER' $content $paper; [Windows.Forms.MessageBox]::Show('Prévia salva em: ' + $preview.Folder,'Menu Flow Printer')|Out-Null}else{Send-MenuFlowPrint ([string]$cashierCombo.SelectedItem) $content 1; [Windows.Forms.MessageBox]::Show('Teste enviado para o caixa.','Menu Flow Printer')|Out-Null} } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
+$testKitchenButton.Add_Click({ try { $paper=if([string]$paperCombo.SelectedItem -eq '58 mm'){58}else{80}; $content=Get-SampleReceipt 'KITCHEN' $paper; if($testModeCheck.Checked){$preview=Save-TestPrint 'LOCAL_TEST' 'KITCHEN' $content $paper; [Windows.Forms.MessageBox]::Show('Prévia salva em: ' + $preview.Folder,'Menu Flow Printer')|Out-Null}else{Send-MenuFlowPrint ([string]$kitchenCombo.SelectedItem) $content 1 $paper; [Windows.Forms.MessageBox]::Show('Teste enviado para a cozinha.','Menu Flow Printer')|Out-Null} } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
+$testBarButton.Add_Click({ try { $paper=if([string]$paperCombo.SelectedItem -eq '58 mm'){58}else{80}; $content=Get-SampleReceipt 'BAR' $paper; if($testModeCheck.Checked){$preview=Save-TestPrint 'LOCAL_TEST' 'BAR' $content $paper; [Windows.Forms.MessageBox]::Show('Prévia salva em: ' + $preview.Folder,'Menu Flow Printer')|Out-Null}else{$target=if($sharedCheck.Checked){[string]$kitchenCombo.SelectedItem}else{[string]$barCombo.SelectedItem}; Send-MenuFlowPrint $target $content 1 $paper; [Windows.Forms.MessageBox]::Show('Teste enviado para o bar.','Menu Flow Printer')|Out-Null} } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
+$testCashierButton.Add_Click({ try { $paper=if([string]$paperCombo.SelectedItem -eq '58 mm'){58}else{80}; $content=Get-SampleReceipt 'CASHIER' $paper; if($testModeCheck.Checked){$preview=Save-TestPrint 'LOCAL_TEST' 'CASHIER' $content $paper; [Windows.Forms.MessageBox]::Show('Prévia salva em: ' + $preview.Folder,'Menu Flow Printer')|Out-Null}else{Send-MenuFlowPrint ([string]$cashierCombo.SelectedItem) $content 1 $paper; [Windows.Forms.MessageBox]::Show('Teste enviado para o caixa.','Menu Flow Printer')|Out-Null} } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
 $openTestFolderButton.Add_Click({ Open-TestFolder })
 $hideButton.Add_Click({ $form.Hide() })
 
