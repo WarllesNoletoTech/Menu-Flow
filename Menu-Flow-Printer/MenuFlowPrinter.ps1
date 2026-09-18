@@ -56,7 +56,9 @@ function New-DefaultConfig {
     apiUrl = ''
     token = ''
     kitchenPrinter = ''
+    barPrinter = ''
     cashierPrinter = ''
+    sharedProductionPrinter = $true
     deviceName = $env:COMPUTERNAME
     deviceId = 'mfp-' + [Guid]::NewGuid().ToString('N')
     enabled = $true
@@ -69,6 +71,8 @@ function Load-MenuFlowConfig {
     $cfg = Get-Content $script:ConfigFile -Raw -Encoding UTF8 | ConvertFrom-Json
     if (!$cfg.deviceId) { $cfg | Add-Member -NotePropertyName deviceId -NotePropertyValue ('mfp-' + [Guid]::NewGuid().ToString('N')) -Force }
     if ($null -eq $cfg.enabled) { $cfg | Add-Member -NotePropertyName enabled -NotePropertyValue $true -Force }
+    if ($null -eq $cfg.sharedProductionPrinter) { $cfg | Add-Member -NotePropertyName sharedProductionPrinter -NotePropertyValue $true -Force }
+    if ($null -eq $cfg.barPrinter) { $cfg | Add-Member -NotePropertyName barPrinter -NotePropertyValue '' -Force }
     return $cfg
   } catch { return New-DefaultConfig }
 }
@@ -129,6 +133,7 @@ function Invoke-MenuFlowApi([string]$Path, [string]$Method = 'GET', $Body = $nul
 function Get-ConfiguredRoles {
   $roles = @()
   if ($script:Config.kitchenPrinter) { $roles += 'KITCHEN' }
+  if (($script:Config.sharedProductionPrinter -and $script:Config.kitchenPrinter) -or $script:Config.barPrinter) { $roles += 'BAR' }
   if ($script:Config.cashierPrinter) { $roles += 'CASHIER' }
   return $roles
 }
@@ -136,6 +141,7 @@ function Get-ConfiguredRoles {
 function Get-PrinterForRole([string]$Role) {
   switch ($Role) {
     'KITCHEN' { return [string]$script:Config.kitchenPrinter }
+    'BAR' { if ($script:Config.sharedProductionPrinter) { return [string]$script:Config.kitchenPrinter } else { return [string]$script:Config.barPrinter } }
     'CASHIER' { return [string]$script:Config.cashierPrinter }
     default { return '' }
   }
@@ -191,9 +197,9 @@ function Invoke-Poll {
 # --- Interface ---
 $form = New-Object Windows.Forms.Form
 $form.Text = 'Menu Flow Printer'
-$form.Size = New-Object Drawing.Size(700,600)
+$form.Size = New-Object Drawing.Size(760,690)
 $form.StartPosition = 'CenterScreen'
-$form.MinimumSize = New-Object Drawing.Size(680,560)
+$form.MinimumSize = New-Object Drawing.Size(740,650)
 $form.BackColor = [Drawing.Color]::FromArgb(248,246,242)
 $form.Font = New-Object Drawing.Font('Segoe UI',10)
 
@@ -205,7 +211,7 @@ $title.AutoSize = $true
 $form.Controls.Add($title)
 
 $subtitle = New-Object Windows.Forms.Label
-$subtitle.Text = 'Impressao automatica da cozinha e do caixa'
+$subtitle.Text = 'Impressao automatica da cozinha, bar e caixa'
 $subtitle.Location = New-Object Drawing.Point(28,60)
 $subtitle.ForeColor = [Drawing.Color]::DimGray
 $subtitle.AutoSize = $true
@@ -229,31 +235,43 @@ $tokenBox = Add-TextBox 28 233 625
 $tokenBox.Text = [string]$script:Config.token
 
 $printers = @(Get-PrinterNames)
-Add-Label 'Impressora da cozinha' 28 278 | Out-Null
-$kitchenCombo = Add-Combo 28 301 300
-Add-Label 'Impressora do caixa' 353 278 | Out-Null
-$cashierCombo = Add-Combo 353 301 300
-Add-Label 'Nome deste computador' 28 350 | Out-Null
-$deviceBox = Add-TextBox 28 373 625
+Add-Label 'Impressora da cozinha / producao' 28 278 | Out-Null
+$kitchenCombo = Add-Combo 28 301 330
+Add-Label 'Impressora do caixa' 385 278 | Out-Null
+$cashierCombo = Add-Combo 385 301 330
+
+$sharedCheck = New-Object Windows.Forms.CheckBox
+$sharedCheck.Text = 'Usar a mesma impressora para cozinha e bar'
+$sharedCheck.Location = New-Object Drawing.Point(28,345)
+$sharedCheck.AutoSize = $true
+$sharedCheck.Checked = [bool]$script:Config.sharedProductionPrinter
+$form.Controls.Add($sharedCheck)
+
+Add-Label 'Impressora do bar (somente se separada)' 28 382 | Out-Null
+$barCombo = Add-Combo 28 405 330
+Add-Label 'Nome deste computador' 385 382 | Out-Null
+$deviceBox = Add-TextBox 385 405 330
 $deviceBox.Text = [string]$script:Config.deviceName
 
-foreach ($combo in @($kitchenCombo,$cashierCombo)) { [void]$combo.Items.Add(''); foreach($p in $printers){ [void]$combo.Items.Add($p) } }
+foreach ($combo in @($kitchenCombo,$barCombo,$cashierCombo)) { [void]$combo.Items.Add(''); foreach($p in $printers){ [void]$combo.Items.Add($p) } }
 $kitchenCombo.SelectedItem = [string]$script:Config.kitchenPrinter
+$barCombo.SelectedItem = [string]$script:Config.barPrinter
 $cashierCombo.SelectedItem = [string]$script:Config.cashierPrinter
-if ($null -eq $kitchenCombo.SelectedItem) { $kitchenCombo.SelectedIndex = 0 }
-if ($null -eq $cashierCombo.SelectedItem) { $cashierCombo.SelectedIndex = 0 }
+foreach ($combo in @($kitchenCombo,$barCombo,$cashierCombo)) { if ($null -eq $combo.SelectedItem) { $combo.SelectedIndex = 0 } }
+$barCombo.Enabled = -not $sharedCheck.Checked
+$sharedCheck.Add_CheckedChanged({ $barCombo.Enabled = -not $sharedCheck.Checked })
 
 $enabledCheck = New-Object Windows.Forms.CheckBox
 $enabledCheck.Text = 'Ativar impressao automatica'
-$enabledCheck.Location = New-Object Drawing.Point(28,425)
+$enabledCheck.Location = New-Object Drawing.Point(28,460)
 $enabledCheck.AutoSize = $true
 $enabledCheck.Checked = [bool]$script:Config.enabled
 $form.Controls.Add($enabledCheck)
 
 $saveButton = New-Object Windows.Forms.Button
 $saveButton.Text = 'Salvar e conectar'
-$saveButton.Location = New-Object Drawing.Point(28,470)
-$saveButton.Size = New-Object Drawing.Size(180,42)
+$saveButton.Location = New-Object Drawing.Point(28,505)
+$saveButton.Size = New-Object Drawing.Size(170,42)
 $saveButton.BackColor = [Drawing.Color]::FromArgb(37,29,25)
 $saveButton.ForeColor = [Drawing.Color]::White
 $saveButton.FlatStyle = 'Flat'
@@ -261,33 +279,41 @@ $form.Controls.Add($saveButton)
 
 $testKitchenButton = New-Object Windows.Forms.Button
 $testKitchenButton.Text = 'Testar cozinha'
-$testKitchenButton.Location = New-Object Drawing.Point(220,470)
-$testKitchenButton.Size = New-Object Drawing.Size(150,42)
+$testKitchenButton.Location = New-Object Drawing.Point(210,505)
+$testKitchenButton.Size = New-Object Drawing.Size(125,42)
 $form.Controls.Add($testKitchenButton)
+
+$testBarButton = New-Object Windows.Forms.Button
+$testBarButton.Text = 'Testar bar'
+$testBarButton.Location = New-Object Drawing.Point(347,505)
+$testBarButton.Size = New-Object Drawing.Size(115,42)
+$form.Controls.Add($testBarButton)
 
 $testCashierButton = New-Object Windows.Forms.Button
 $testCashierButton.Text = 'Testar caixa'
-$testCashierButton.Location = New-Object Drawing.Point(382,470)
-$testCashierButton.Size = New-Object Drawing.Size(150,42)
+$testCashierButton.Location = New-Object Drawing.Point(474,505)
+$testCashierButton.Size = New-Object Drawing.Size(115,42)
 $form.Controls.Add($testCashierButton)
 
 $hideButton = New-Object Windows.Forms.Button
 $hideButton.Text = 'Minimizar'
-$hideButton.Location = New-Object Drawing.Point(544,470)
-$hideButton.Size = New-Object Drawing.Size(109,42)
+$hideButton.Location = New-Object Drawing.Point(601,505)
+$hideButton.Size = New-Object Drawing.Size(114,42)
 $form.Controls.Add($hideButton)
 
 $hint = New-Object Windows.Forms.Label
-$hint.Text = 'Depois de configurado, o Menu Flow Printer pode ficar minimizado ao lado do relogio.'
-$hint.Location = New-Object Drawing.Point(28,528)
-$hint.Size = New-Object Drawing.Size(620,30)
+$hint.Text = 'Uma impressora: marque a opcao acima. O Menu Flow separa e corta COZINHA e BAR automaticamente.'
+$hint.Location = New-Object Drawing.Point(28,566)
+$hint.Size = New-Object Drawing.Size(690,55)
 $hint.ForeColor = [Drawing.Color]::DimGray
 $form.Controls.Add($hint)
 
 $saveButton.Add_Click({
-  $script:Config.apiUrl = $apiBox.Text.Trim()
+  $script:Config.apiUrl = $apiBox.Text.Trim().TrimEnd('/')
   $script:Config.token = $tokenBox.Text.Trim()
   $script:Config.kitchenPrinter = [string]$kitchenCombo.SelectedItem
+  $script:Config.barPrinter = [string]$barCombo.SelectedItem
+  $script:Config.sharedProductionPrinter = $sharedCheck.Checked
   $script:Config.cashierPrinter = [string]$cashierCombo.SelectedItem
   $script:Config.deviceName = $deviceBox.Text.Trim()
   $script:Config.enabled = $enabledCheck.Checked
@@ -296,6 +322,7 @@ $saveButton.Add_Click({
   Invoke-Poll
 })
 $testKitchenButton.Add_Click({ try { Send-MenuFlowPrint ([string]$kitchenCombo.SelectedItem) "MENU FLOW PRINTER`n`nTESTE COZINHA`nImpressora configurada corretamente.`n" 1; [Windows.Forms.MessageBox]::Show('Teste enviado para a cozinha.','Menu Flow Printer') | Out-Null } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
+$testBarButton.Add_Click({ try { $target = if($sharedCheck.Checked){[string]$kitchenCombo.SelectedItem}else{[string]$barCombo.SelectedItem}; Send-MenuFlowPrint $target "MENU FLOW PRINTER`n`nTESTE BAR`nImpressora configurada corretamente.`n" 1; [Windows.Forms.MessageBox]::Show('Teste enviado para o bar.','Menu Flow Printer') | Out-Null } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
 $testCashierButton.Add_Click({ try { Send-MenuFlowPrint ([string]$cashierCombo.SelectedItem) "MENU FLOW PRINTER`n`nTESTE CAIXA`nImpressora configurada corretamente.`n" 1; [Windows.Forms.MessageBox]::Show('Teste enviado para o caixa.','Menu Flow Printer') | Out-Null } catch { [Windows.Forms.MessageBox]::Show($_.Exception.Message,'Erro',[Windows.Forms.MessageBoxButtons]::OK,[Windows.Forms.MessageBoxIcon]::Error) | Out-Null } })
 $hideButton.Add_Click({ $form.Hide() })
 

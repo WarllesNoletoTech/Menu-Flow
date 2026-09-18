@@ -1,2 +1,2 @@
-Menu Flow Printer 1.0.0
-Integrado ao Menu Flow - Operacao de Mesas/Cozinha/Caixa
+Menu Flow Printer 1.1.0
+Integrado ao Menu Flow - Operação compacta de Mesas / Cozinha / Bar / Caixa

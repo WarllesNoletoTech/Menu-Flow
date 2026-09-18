@@ -177,3 +177,14 @@ Agente local autenticado pela chave `x-menuflow-printer-token`:
 8. Caixa toca `Imprimir conta`, registra pagamentos e fecha a mesa.
 9. Desligar temporariamente o Menu Flow Printer e confirmar que `Imprimir` abre o fallback do navegador.
 10. Fazer pedido `DELIVERY` e confirmar que apenas ele continua elegível à integração Rappidex.
+
+## Operação compacta e Menu Flow Printer 1.1
+
+- Pedidos de mesa enviados pelo garçom entram diretamente em `PREPARING`.
+- O cardápio classifica cada categoria com `productionSector`: `KITCHEN`, `BAR` ou `NONE`.
+- Ao enviar um pedido, os itens são congelados no pedido com seu setor e a fila de impressão gera uma comanda independente por setor.
+- Uma única impressora pode receber COZINHA e BAR; o agente também aceita impressoras separadas.
+- A tela Operação usa paginação de mesas, produção e caixa para reduzir rolagem durante o atendimento.
+- A produção finaliza Cozinha e Bar separadamente. O pedido só vira `READY` quando todos os setores envolvidos estiverem prontos.
+- O caixa possui fechamento integral rápido em uma única janela: Pix, Dinheiro, Débito ou Crédito. Pagamentos parciais continuam disponíveis em Mais opções.
+- Categorias `NONE` não entram na fila de produção nem de impressão; se um pedido tiver somente itens `NONE`, ele nasce pronto para entrega.
