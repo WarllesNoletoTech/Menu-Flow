@@ -8,7 +8,7 @@ Implementação adicionada sobre a versão `Menu-Flow-main (37)`.
 - Cadastro rápido e gerenciamento de mesas por estabelecimento.
 - Abertura de mesa/comanda com quantidade de pessoas, cliente opcional e garçom responsável.
 - Vários pedidos vinculados à mesma comanda, reaproveitando o cardápio, preços, promoções e adicionais existentes.
-- Fluxo de salão: pedido -> preparo -> pronto -> entregue na mesa -> conclusão ao fechar a comanda.
+- Fluxo de salão rápido: pedido do garçom -> **Em preparo automaticamente** -> Pronto -> Entregue na mesa -> conclusão ao fechar a comanda. Não existe etapa de aceitar para pedido de mesa.
 - Status visuais: Livre, Aguardando pedido, Pedido em preparo, Pedido pronto, Ocupada e Aguardando pagamento.
 - Transferência de mesa, junção de mesas e troca de garçom.
 - Taxa de serviço percentual configurável por estabelecimento.
@@ -22,6 +22,7 @@ Implementação adicionada sobre a versão `Menu-Flow-main (37)`.
 - PWA separado `Menu Flow Garçom`, com manifest próprio e abertura direta no controle de mesas.
 - Funcionário com acesso ao salão entra diretamente na tela de Mesas.
 - Notificação OneSignal para o garçom responsável quando um pedido da mesa fica pronto.
+- Notificação OneSignal para caixa/gerente/lojista quando o garçom solicita a conta.
 - Pedidos de mesa aparecem como `Mesa / salão` no painel de pedidos e no faturamento existente.
 
 ## Proteção da integração Rappidex
@@ -44,7 +45,9 @@ Também foram adicionadas validações para impedir que um pedido de mesa receba
 - `TABLES_VIEW`: visualizar mesas/comandas.
 - `TABLES_OPEN`: abrir mesa.
 - `TABLES_ORDER`: adicionar pedidos.
+- `TABLES_KITCHEN`: operar a fila da cozinha e marcar pedido como pronto.
 - `TABLES_DELIVER`: marcar pedido pronto como entregue na mesa.
+- `TABLES_PRINT`: imprimir pedido ou pré-conta.
 - `TABLES_CANCEL`: cancelar pedido de mesa.
 - `TABLES_TRANSFER`: transferir/juntar mesas e trocar garçom.
 - `TABLES_REQUEST_BILL`: solicitar conta.
@@ -60,7 +63,7 @@ O preset Garçom recebe as permissões operacionais do salão. Caixa recebe as p
 2. Criar/editar um funcionário como Garçom.
 3. Entrar com o funcionário e abrir uma mesa.
 4. Adicionar produtos e adicionais pelo cardápio.
-5. No painel de pedidos do lojista, aceitar -> preparar -> pronto.
+5. Abrir `Operação > Cozinha` e confirmar que o pedido já chegou em `Em preparo`, sem aceite. Marcar `Pronto`.
 6. Confirmar a notificação do garçom e marcar `Entregue na mesa`.
 7. Adicionar um segundo pedido na mesma mesa.
 8. Solicitar a conta.
@@ -75,6 +78,7 @@ Não existe migration SQL. O MongoDB cria as novas coleções/documentos conform
 - `restauranttables`
 - `tablesessions`
 - `tableevents`
+- `printjobs` (fila temporária do Menu Flow Printer, com expiração automática)
 
 Os pedidos existentes continuam compatíveis. Novos campos em `Order`, `User` e `RestaurantSettings` são opcionais/defaultados.
 
@@ -99,9 +103,77 @@ Depois faça o deploy normal do backend e frontend usando as mesmas variáveis d
 - Transferência de mesas agrupadas atua na mesa selecionada na interface, sem assumir sempre a primeira mesa da comanda.
 - Foi adicionado índice único parcial para impedir duas comandas abertas usando a mesma mesa em condições de concorrência.
 - Abertura, transferência e junção retornam conflito amigável quando outra operação ocupa a mesa simultaneamente.
-- Validação de transpiração TypeScript/TSX executada em 168 arquivos de código-fonte: 0 erros sintáticos.
+- Validação de transpiração TypeScript/TSX executada em 171 arquivos de código-fonte: 0 erros sintáticos.
 - Smoke-check estrutural confirmou módulo de mesas, rotas, manifest do garçom e barreira `fulfillment !== DELIVERY` na integração Rappidex.
 
 ### Observação sobre build no ambiente de revisão
 
 O `npm ci`/`npm run typecheck` completo não pôde ser concluído neste ambiente porque o acesso ao registry do npm falhou por DNS (`EAI_AGAIN`). O pacote foi mantido sem `node_modules`. Antes do deploy, execute normalmente `npm ci`, `npm run typecheck` e `npm run build` em um ambiente com acesso ao registry.
+
+
+## Operação simplificada
+
+A navegação do salão foi concentrada em uma única tela chamada **Operação**. Dentro dela existem três visões rápidas, sem o funcionário precisar procurar recursos em menus diferentes:
+
+- **Mesas** — garçom abre mesa, adiciona itens, entrega pedidos e solicita a conta.
+- **Cozinha** — recebe automaticamente os pedidos de mesa já em `Em preparo`, pode imprimir e marca apenas `Pronto`.
+- **Caixa** — mostra automaticamente as mesas com conta solicitada, permite imprimir pré-conta, registrar pagamentos e fechar a mesa.
+
+Funcionário com função `WAITER` abre em Mesas; `KITCHEN` abre em Cozinha; `CASHIER` abre em Caixa. A tela atualiza automaticamente em intervalos curtos.
+
+## Menu Flow Printer
+
+Foi incluído o agente local **Menu Flow Printer** na pasta `Menu-Flow-Printer`.
+
+### O que ele faz
+
+- Instala no Windows por `Instalar Menu Flow Printer.bat`.
+- Fica na bandeja do Windows e inicia automaticamente com o computador.
+- Lista as impressoras já instaladas no Windows.
+- Permite escolher uma impressora para **Cozinha** e outra para **Caixa**.
+- Imprime em modo RAW/ESC-POS, adequado para impressoras térmicas compatíveis.
+- Suporta papel 58 mm e 80 mm no conteúdo gerado pelo backend.
+- Pode imprimir pedido da cozinha automaticamente assim que o garçom envia.
+- A pré-conta pode ficar apenas na fila do caixa (padrão) ou ser impressa automaticamente, conforme a configuração do lojista.
+- Há impressão manual por botão e fallback pelo navegador se o agente estiver offline.
+
+### Configuração
+
+1. Faça deploy do backend com o novo módulo `PrinterModule`.
+2. Faça deploy do frontend.
+3. No painel do lojista, abra `Operação > Menu Flow Printer`.
+4. Ative o recurso, escolha 58/80 mm e gere uma nova chave.
+5. No computador do restaurante, execute `Menu-Flow-Printer/Instalar Menu Flow Printer.bat`.
+6. Informe a URL pública do backend, cole a chave, escolha as impressoras de cozinha/caixa e clique em `Salvar e conectar`.
+7. Execute os testes de cozinha e caixa no aplicativo local.
+
+O agente usa polling autenticado: o Windows não abre porta pública. A chave completa é exibida apenas no momento da geração e o backend armazena apenas o hash.
+
+### Rotas principais do Printer
+
+Painel autenticado:
+
+- `GET /printer/settings`
+- `PATCH /printer/settings`
+- `POST /printer/token`
+- `POST /printer/jobs/order/:orderId`
+- `POST /printer/jobs/bill/:sessionId`
+- `GET /printer/jobs/recent`
+
+Agente local autenticado pela chave `x-menuflow-printer-token`:
+
+- `POST /printer/agent/claim`
+- `PATCH /printer/agent/jobs/:jobId`
+
+## Novo teste operacional recomendado
+
+1. Ativar `Controle de mesas` e o Menu Flow Printer.
+2. Abrir uma mesa com usuário Garçom.
+3. Adicionar um item e tocar `Enviar para cozinha`.
+4. Confirmar que o pedido entra imediatamente em `Operação > Cozinha` como `Em preparo` e, se impressão automática estiver ativa, sai na térmica sem janela do navegador.
+5. Cozinha toca `Pronto`; confirmar aviso no garçom.
+6. Garçom entrega e toca `Pedir conta`.
+7. Confirmar que a mesa entra imediatamente em `Operação > Caixa` e que caixa/gerente recebem notificação.
+8. Caixa toca `Imprimir conta`, registra pagamentos e fecha a mesa.
+9. Desligar temporariamente o Menu Flow Printer e confirmar que `Imprimir` abre o fallback do navegador.
+10. Fazer pedido `DELIVERY` e confirmar que apenas ele continua elegível à integração Rappidex.

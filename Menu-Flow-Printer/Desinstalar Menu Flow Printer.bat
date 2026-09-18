@@ -1,0 +1,3 @@
+@echo off
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$startup=[Environment]::GetFolderPath('Startup'); $desktop=[Environment]::GetFolderPath('Desktop'); Remove-Item (Join-Path $startup 'Menu Flow Printer.lnk') -Force -ErrorAction SilentlyContinue; Remove-Item (Join-Path $desktop 'Menu Flow Printer.lnk') -Force -ErrorAction SilentlyContinue; Get-CimInstance Win32_Process -Filter \"Name='powershell.exe'\" | Where-Object {$_.ProcessId -ne $PID -and $_.CommandLine -like '*MenuFlowPrinter.ps1*'} | ForEach-Object {Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue}; Remove-Item (Join-Path $env:LOCALAPPDATA 'MenuFlowPrinter') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Menu Flow Printer removido.'"
+pause
