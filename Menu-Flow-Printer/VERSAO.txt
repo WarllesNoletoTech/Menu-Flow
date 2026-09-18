@@ -1,2 +1,2 @@
-Menu Flow Printer 1.1.0
-Integrado ao Menu Flow - Operação compacta de Mesas / Cozinha / Bar / Caixa
+Menu Flow Printer 1.2.0
+Modo de teste sem impressora + layout térmico 58 mm / 80 mm
